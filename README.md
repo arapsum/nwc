@@ -30,3 +30,12 @@ nwc -l <FILE>
 nwc --lines <FILE>
 
 ```
+
+### Count Words
+
+```txt
+
+nwc -w <FILE>
+nwc --words <FILE>
+
+```

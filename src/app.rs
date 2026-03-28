@@ -16,9 +16,13 @@ pub struct App {
     #[arg(short = 'c', long = "bytes")]
     bytes: bool,
 
-    /// prints the number of lines in a file
+    /// prints the number of lines
     #[arg(short = 'l', long = "lines")]
     lines: bool,
+
+    /// prints the word count
+    #[arg(short = 'w', long = "words")]
+    words: bool,
 
     /// The file to be worked on
     file: Option<PathBuf>,
@@ -30,10 +34,11 @@ impl App {
     }
 
     pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let no_flags_specified = !self.bytes && !self.lines;
+        let no_flags_specified = !self.bytes && !self.lines && !self.words;
 
         let show_bytes = self.bytes || no_flags_specified;
         let show_lines = self.lines || no_flags_specified;
+        let show_words = self.words || no_flags_specified;
 
         let mut output = String::new();
 
@@ -47,18 +52,26 @@ impl App {
 
             if show_lines {
                 let lines = buffer.iter().filter(|&&b| b == b'\n').count();
-                output.push_str(&format!("{} ", lines));
+                output.push_str(&format!("{lines} ",));
             }
 
-            if show_bytes {
+            if show_bytes || show_words {
                 let contents = std::str::from_utf8(&buffer)?;
 
-                let bytes = contents.len();
+                if show_words {
+                    let words = contents.split_whitespace().count();
 
-                output.push_str(&format!("{}", bytes));
+                    output.push_str(&format!("{words} "));
+                }
+
+                if show_bytes {
+                    let bytes = contents.len();
+
+                    output.push_str(&format!("{bytes} ",));
+                }
             }
 
-            println!("{output} {}", path.display());
+            println!("{output}{}", path.display());
         }
 
         Ok(())
