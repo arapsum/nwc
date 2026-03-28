@@ -66,23 +66,23 @@ impl App {
             write!(output, "{lines} ")?;
         }
 
-        if show_bytes || show_words || show_chars {
-            let contents = std::str::from_utf8(&buffer)?;
+        if show_words || show_chars {
+            let contents = std::str::from_utf8(&buffer).ok();
 
             if show_words {
-                let words = contents.split_whitespace().count();
+                let words = contents.map_or(0, |c| c.split_whitespace().count());
                 write!(output, "{words} ")?;
             }
 
             if show_chars {
-                let chars = contents.chars().count();
+                let chars = contents.map_or(0, |c| c.chars().count());
                 write!(output, "{chars} ")?;
             }
+        }
 
-            if show_bytes {
-                let bytes = contents.len();
-                write!(output, "{bytes} ")?;
-            }
+        if show_bytes {
+            let bytes = buffer.len();
+            write!(output, "{bytes} ")?;
         }
 
         if let Some(path) = &self.file {
