@@ -45,24 +45,14 @@ impl App {
         let show_words = self.words || no_flags_specified;
         let show_chars = self.chars;
 
-        let buffer = if let Some(path) = &self.file {
-            let file = File::open(path)?;
-            let mut reader = BufReader::new(file);
-
-            let mut buffer = Vec::new();
-
-            reader.read_to_end(&mut buffer)?;
-
-            buffer
+        let reader: Box<dyn Read> = if let Some(path) = &self.file {
+            Box::new(File::open(path)?)
         } else {
-            let f = io::stdin();
-            let mut reader = BufReader::new(f);
-            let mut buffer = Vec::new();
-
-            reader.read_to_end(&mut buffer)?;
-
-            buffer
+            Box::new(io::stdin())
         };
+
+        let mut buffer = Vec::new();
+        BufReader::new(reader).read_to_end(&mut buffer)?;
 
         let mut output = String::new();
 
