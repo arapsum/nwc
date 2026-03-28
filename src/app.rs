@@ -75,7 +75,7 @@ impl App {
             }
 
             if show_chars {
-                let chars = contents.map_or(0, |c| c.chars().count());
+                let chars = contents.map_or(buffer.len(), |c| c.chars().count());
                 write!(output, "{chars} ")?;
             }
         }
