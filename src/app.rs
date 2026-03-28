@@ -1,4 +1,7 @@
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::struct_excessive_bools)]
 use std::{
+    fmt::Write,
     fs::File,
     io::{self, BufReader, Read, Stdin},
     path::PathBuf,
@@ -7,6 +10,7 @@ use std::{
 use clap::Parser;
 
 /// Print  newline, word, and byte counts for each FILE, and a total line if more than one FILE is specified.
+///
 /// A word is a non-zero-length sequence of printable characters delimited by white space.
 /// With no FILE, or when FILE is -, read standard input.
 #[derive(Debug, Parser)]
@@ -33,6 +37,7 @@ pub struct App {
 }
 
 impl App {
+    #[must_use]
     pub fn new() -> Self {
         Self::parse()
     }
@@ -57,8 +62,8 @@ impl App {
         let mut output = String::new();
 
         if show_lines {
-            let lines = buffer.iter().filter(|&&b| b == b'\n').count();
-            output.push_str(&format!("{lines} ",));
+            let lines = bytecount::count(&buffer, b'\n');
+            write!(output, "{lines} ")?;
         }
 
         if show_bytes || show_words || show_chars {
@@ -66,25 +71,22 @@ impl App {
 
             if show_words {
                 let words = contents.split_whitespace().count();
-
-                output.push_str(&format!("{words} "));
+                write!(output, "{words} ")?;
             }
 
             if show_chars {
                 let chars = contents.chars().count();
-
-                output.push_str(&format!("{chars} "));
+                write!(output, "{chars} ")?;
             }
 
             if show_bytes {
                 let bytes = contents.len();
-
-                output.push_str(&format!("{bytes} ",));
+                write!(output, "{bytes} ")?;
             }
         }
 
         if let Some(path) = &self.file {
-            output.push_str(&format!("{}", path.display()));
+            write!(output, "{}", path.display())?;
         }
 
         println!("{output}");
