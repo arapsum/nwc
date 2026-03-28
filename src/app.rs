@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{self, BufReader, Read},
+    io::{self, BufReader, Read, Stdin},
     path::PathBuf,
 };
 
@@ -45,10 +45,10 @@ impl App {
         let show_words = self.words || no_flags_specified;
         let show_chars = self.chars;
 
-        let reader: Box<dyn Read> = if let Some(path) = &self.file {
-            Box::new(File::open(path)?)
+        let reader = if let Some(path) = &self.file {
+            Input::File(File::open(path)?)
         } else {
-            Box::new(io::stdin())
+            Input::Stdin(io::stdin())
         };
 
         let mut buffer = Vec::new();
@@ -96,5 +96,19 @@ impl App {
 impl Default for App {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+enum Input {
+    File(File),
+    Stdin(Stdin),
+}
+
+impl Read for Input {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        match self {
+            Self::File(file) => file.read(buf),
+            Self::Stdin(stdin) => stdin.read(buf),
+        }
     }
 }
