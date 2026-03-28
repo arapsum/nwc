@@ -16,6 +16,10 @@ pub struct App {
     #[arg(short = 'c', long = "bytes")]
     bytes: bool,
 
+    /// prints the number of lines in a file
+    #[arg(short = 'l', long = "lines")]
+    lines: bool,
+
     /// The file to be worked on
     file: Option<PathBuf>,
 }
@@ -26,7 +30,12 @@ impl App {
     }
 
     pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let show_bytes = self.bytes;
+        let no_flags_specified = !self.bytes && !self.lines;
+
+        let show_bytes = self.bytes || no_flags_specified;
+        let show_lines = self.lines || no_flags_specified;
+
+        let mut output = String::new();
 
         if let Some(path) = &self.file {
             let file = File::open(path)?;
@@ -36,13 +45,20 @@ impl App {
 
             reader.read_to_end(&mut buffer)?;
 
+            if show_lines {
+                let lines = buffer.iter().filter(|&&b| b == b'\n').count();
+                output.push_str(&format!("{} ", lines));
+            }
+
             if show_bytes {
                 let contents = std::str::from_utf8(&buffer)?;
 
                 let bytes = contents.len();
 
-                println!("{} {}", bytes, path.display());
+                output.push_str(&format!("{}", bytes));
             }
+
+            println!("{output} {}", path.display());
         }
 
         Ok(())

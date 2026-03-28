@@ -22,3 +22,11 @@ nwc --bytes <FILE>
 
 ```
 
+### Count Lines
+
+```txt
+
+nwc -l <FILE>
+nwc --lines <FILE>
+
+```
