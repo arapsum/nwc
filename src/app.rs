@@ -1,4 +1,8 @@
-use std::{path::PathBuf, process::ExitCode};
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+    path::PathBuf,
+};
 
 use clap::Parser;
 
@@ -8,6 +12,11 @@ use clap::Parser;
 #[derive(Debug, Parser)]
 #[command(version, about, author)]
 pub struct App {
+    /// prints the byte count
+    #[arg(short = 'c', long = "bytes")]
+    bytes: bool,
+
+    /// The file to be worked on
     file: Option<PathBuf>,
 }
 
@@ -16,10 +25,27 @@ impl App {
         Self::parse()
     }
 
-    pub fn run(&self) -> Result<ExitCode, ExitCode> {
-        println!("{:?}", &self.file);
+    pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
+        let show_bytes = self.bytes;
 
-        Ok(ExitCode::SUCCESS)
+        if let Some(path) = &self.file {
+            let file = File::open(path)?;
+            let mut reader = BufReader::new(file);
+
+            let mut buffer = Vec::new();
+
+            reader.read_to_end(&mut buffer)?;
+
+            if show_bytes {
+                let contents = std::str::from_utf8(&buffer)?;
+
+                let bytes = contents.len();
+
+                println!("{} {}", bytes, path.display());
+            }
+        }
+
+        Ok(())
     }
 }
 

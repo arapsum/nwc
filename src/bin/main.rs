@@ -1,7 +1,13 @@
+use std::process::ExitCode;
+
 use nwc::App;
 
-fn main() {
+fn main() -> Result<ExitCode, ExitCode> {
     if let Err(e) = App::new().run() {
-        eprintln!("{e:?}");
+        println!("Error: {}", &e);
+
+        Err(ExitCode::FAILURE)
+    } else {
+        Ok(ExitCode::SUCCESS)
     }
 }
