@@ -24,6 +24,10 @@ pub struct App {
     #[arg(short = 'w', long = "words")]
     words: bool,
 
+    /// prints the characters count
+    #[arg(short = 'm', long = "chars")]
+    chars: bool,
+
     /// The file to be worked on
     file: Option<PathBuf>,
 }
@@ -34,11 +38,12 @@ impl App {
     }
 
     pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let no_flags_specified = !self.bytes && !self.lines && !self.words;
+        let no_flags_specified = !self.bytes && !self.lines && !self.words && !self.chars;
 
         let show_bytes = self.bytes || no_flags_specified;
         let show_lines = self.lines || no_flags_specified;
         let show_words = self.words || no_flags_specified;
+        let show_chars = self.chars;
 
         let mut output = String::new();
 
@@ -55,13 +60,19 @@ impl App {
                 output.push_str(&format!("{lines} ",));
             }
 
-            if show_bytes || show_words {
+            if show_bytes || show_words || show_chars {
                 let contents = std::str::from_utf8(&buffer)?;
 
                 if show_words {
                     let words = contents.split_whitespace().count();
 
                     output.push_str(&format!("{words} "));
+                }
+
+                if show_chars {
+                    let chars = contents.chars().count();
+
+                    output.push_str(&format!("{chars} "));
                 }
 
                 if show_bytes {
