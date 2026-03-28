@@ -1,0 +1,16 @@
+[package]
+name = "nwc"
+version = "0.1.0"
+edition = "2024"
+authors = ["Kibet arap Sum <arapsum@gmail.com"]
+
+[[bin]]
+name = "nwc"
+path = "src/bin/main.rs"
+
+[lib]
+name = "nwc"
+path = "src/lib.rs"
+
+[dependencies]
+clap = { version = "4.6.0", features = ["derive"] }
