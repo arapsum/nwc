@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{BufReader, Read},
+    io::{self, BufReader, Read},
     path::PathBuf,
 };
 
@@ -45,9 +45,7 @@ impl App {
         let show_words = self.words || no_flags_specified;
         let show_chars = self.chars;
 
-        let mut output = String::new();
-
-        if let Some(path) = &self.file {
+        let buffer = if let Some(path) = &self.file {
             let file = File::open(path)?;
             let mut reader = BufReader::new(file);
 
@@ -55,35 +53,51 @@ impl App {
 
             reader.read_to_end(&mut buffer)?;
 
-            if show_lines {
-                let lines = buffer.iter().filter(|&&b| b == b'\n').count();
-                output.push_str(&format!("{lines} ",));
-            }
+            buffer
+        } else {
+            let f = io::stdin();
+            let mut reader = BufReader::new(f);
+            let mut buffer = Vec::new();
 
-            if show_bytes || show_words || show_chars {
-                let contents = std::str::from_utf8(&buffer)?;
+            reader.read_to_end(&mut buffer)?;
 
-                if show_words {
-                    let words = contents.split_whitespace().count();
+            buffer
+        };
 
-                    output.push_str(&format!("{words} "));
-                }
+        let mut output = String::new();
 
-                if show_chars {
-                    let chars = contents.chars().count();
-
-                    output.push_str(&format!("{chars} "));
-                }
-
-                if show_bytes {
-                    let bytes = contents.len();
-
-                    output.push_str(&format!("{bytes} ",));
-                }
-            }
-
-            println!("{output}{}", path.display());
+        if show_lines {
+            let lines = buffer.iter().filter(|&&b| b == b'\n').count();
+            output.push_str(&format!("{lines} ",));
         }
+
+        if show_bytes || show_words || show_chars {
+            let contents = std::str::from_utf8(&buffer)?;
+
+            if show_words {
+                let words = contents.split_whitespace().count();
+
+                output.push_str(&format!("{words} "));
+            }
+
+            if show_chars {
+                let chars = contents.chars().count();
+
+                output.push_str(&format!("{chars} "));
+            }
+
+            if show_bytes {
+                let bytes = contents.len();
+
+                output.push_str(&format!("{bytes} ",));
+            }
+        }
+
+        if let Some(path) = &self.file {
+            output.push_str(&format!("{}", path.display()));
+        }
+
+        println!("{output}");
 
         Ok(())
     }

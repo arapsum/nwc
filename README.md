@@ -2,7 +2,6 @@
 
 A lightweight Rust implementation of the Unix `wc` (word count) utility.
 
-> ⚠️ **Note:** Reading from `stdin` is not yet supported. All commands require a `<FILE>` argument.
 
 ---
 
@@ -112,7 +111,6 @@ nwc -l -c file.txt
 
 ##  Roadmap
 
-* [ ] Add `stdin` support
 * [ ] Support multiple files
 * [ ] Match GNU `wc` output formatting more closely
 * [ ] Add benchmarks
